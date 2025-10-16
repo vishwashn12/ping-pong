@@ -20,6 +20,10 @@ class Ball:
 
         if self.y <= 0 or self.y + self.height >= self.screen_height:
             self.velocity_y *= -1
+            # Play wall bounce sound
+            if hasattr(self, 'sound_wall'):
+                self.sound_wall.play()
+
 
     def check_collision(self, player, ai):
         if self.rect().colliderect(player.rect()) or self.rect().colliderect(ai.rect()):

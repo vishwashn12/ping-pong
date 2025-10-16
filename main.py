@@ -1,5 +1,13 @@
 import pygame
 from game.game_engine import GameEngine
+import pygame
+from game.game_engine import GameEngine
+import os
+
+# Initialize mixer before anything else
+pygame.mixer.pre_init(44100, -16, 2, 512)
+pygame.init()
+
 
 # Initialize pygame/Start application
 pygame.init()

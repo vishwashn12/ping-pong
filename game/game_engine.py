@@ -1,8 +1,7 @@
+import os
 import pygame
 from .paddle import Paddle
 from .ball import Ball
-
-# Game Engine
 WHITE = (255, 255, 255)
 
 class GameEngine:
@@ -12,16 +11,26 @@ class GameEngine:
         self.paddle_width = 10
         self.paddle_height = 100
 
+        # Initialize paddles and ball
         self.player = Paddle(10, height // 2 - 50, self.paddle_width, self.paddle_height)
         self.ai = Paddle(width - 20, height // 2 - 50, self.paddle_width, self.paddle_height)
         self.ball = Ball(width // 2, height // 2, 7, 7, width, height)
 
+        # Load sounds **before assigning to ball**
+        sound_path = os.path.join(os.path.dirname(__file__), "sounds")
+        self.snd_paddle = pygame.mixer.Sound(os.path.join(sound_path, "paddle_hit.wav"))
+        self.snd_wall = pygame.mixer.Sound(os.path.join(sound_path, "wall_bounce.wav"))
+        self.snd_score = pygame.mixer.Sound(os.path.join(sound_path, "score.wav"))
+
+        # Assign wall sound to ball
+        self.ball.sound_wall = self.snd_wall
+
+        # Scores and stats
         self.player_score = 0
         self.ai_score = 0
         self.font = pygame.font.SysFont("Arial", 30)
-
         self.total_hits = 0
-        self.winning_score = 3  # default: Best of 5 (first to 3 wins)
+        self.winning_score = 3  # default: Best of 5
 
     def reset_game(self):
         self.player_score = 0
@@ -48,21 +57,25 @@ class GameEngine:
             self.ball.velocity_x *= -1
             hit_pos = (self.ball.y + self.ball.height / 2) - (self.player.y + self.player.height / 2)
             self.ball.velocity_y += hit_pos * 0.05
-            self.total_hits += 1  # Count paddle hit
+            self.total_hits += 1
+            self.snd_paddle.play()  # play paddle hit sound
 
         elif self.ball.rect().colliderect(self.ai.rect()):
             self.ball.velocity_x *= -1
             hit_pos = (self.ball.y + self.ball.height / 2) - (self.ai.y + self.ai.height / 2)
             self.ball.velocity_y += hit_pos * 0.05
-            self.total_hits += 1  # Count paddle hit
+            self.total_hits += 1
+            self.snd_paddle.play()  # play paddle hit sound
 
         # Score handling
         if self.ball.x <= 0:
             self.ai_score += 1
             self.ball.reset()
+            self.snd_score.play()
         elif self.ball.x >= self.width:
             self.player_score += 1
             self.ball.reset()
+            self.snd_score.play()
 
         # AI paddle movement
         self.ai.auto_track(self.ball, self.height)
