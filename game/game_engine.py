@@ -20,8 +20,17 @@ class GameEngine:
         self.ai_score = 0
         self.font = pygame.font.SysFont("Arial", 30)
 
-        # Initialize stats
         self.total_hits = 0
+        self.winning_score = 3  # default: Best of 5 (first to 3 wins)
+
+    def reset_game(self):
+        self.player_score = 0
+        self.ai_score = 0
+        self.total_hits = 0
+        self.ball.reset()
+        # Reset paddles to center
+        self.player.y = self.height // 2 - self.player.height // 2
+        self.ai.y = self.height // 2 - self.ai.height // 2
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -72,6 +81,4 @@ class GameEngine:
         screen.blit(ai_text, (self.width * 3//4, 20))
 
     def check_game_over(self, screen):
-        if self.player_score < 5 and self.ai_score < 5:
-            return False  # Game not over yet
-        return True
+        return self.player_score >= self.winning_score or self.ai_score >= self.winning_score
