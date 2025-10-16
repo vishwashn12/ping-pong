@@ -29,9 +29,25 @@ class GameEngine:
             self.player.move(10, self.height)
 
     def update(self):
+        # Move the ball first
         self.ball.move()
-        self.ball.check_collision(self.player, self.ai)
 
+        # --- Collision with paddles ---
+        if self.ball.rect().colliderect(self.player.rect()):
+            self.ball.velocity_x *= -1  # Reverse horizontal direction
+
+            # Adjust Y velocity based on hit position
+            hit_pos = (self.ball.y + self.ball.height / 2) - (self.player.y + self.player.height / 2)
+            self.ball.velocity_y += hit_pos * 0.05  # tweak 0.05 for sensitivity
+
+        elif self.ball.rect().colliderect(self.ai.rect()):
+            self.ball.velocity_x *= -1
+
+            # Adjust Y velocity for AI paddle hit
+            hit_pos = (self.ball.y + self.ball.height / 2) - (self.ai.y + self.ai.height / 2)
+            self.ball.velocity_y += hit_pos * 0.05
+
+        # Score handling
         if self.ball.x <= 0:
             self.ai_score += 1
             self.ball.reset()
@@ -39,6 +55,7 @@ class GameEngine:
             self.player_score += 1
             self.ball.reset()
 
+        # AI paddle movement
         self.ai.auto_track(self.ball, self.height)
 
     def render(self, screen):
